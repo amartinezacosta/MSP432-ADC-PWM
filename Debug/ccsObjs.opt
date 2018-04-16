@@ -1,0 +1,1 @@
+"./main.obj" "./startup_msp432p401m_ccs.obj" "./system_msp432p401m.obj" "./Hardware/ADC_Driver.obj" "./Hardware/CS_Driver.obj" "./Hardware/TIMERA_Driver.obj" "../msp432p401m.cmd" -llibc.a -lmsp432p4xx_driverlib.lib 

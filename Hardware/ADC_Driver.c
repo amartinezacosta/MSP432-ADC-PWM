@@ -3,59 +3,81 @@
 volatile uint8_t Sample_Ready = 0;
 uint16_t ADC_Buffer[ADC_BUFFER_SIZE];
 
-void ADC_Init(void)
+void ADC_Enable(uint32_t ClockSource, uint32_t Predivider, uint32_t Divider)
 {
-    /* Initializing ADC (MCLK/1/4) */
-    MAP_ADC14_enableModule();
-    MAP_ADC14_initModule(ADC_CLOCKSOURCE_MCLK, ADC_PREDIVIDER_1, ADC_DIVIDER_4, 0);
-
-    /* Configuring GPIOs (5.5 A0) */
-    MAP_GPIO_setAsPeripheralModuleFunctionInputPin(GPIO_PORT_P5, GPIO_PIN5, GPIO_TERTIARY_MODULE_FUNCTION);
-
-    /* Configuring ADC Memory */
-    MAP_ADC14_configureSingleSampleMode(ADC_MEM0, true);
-    MAP_ADC14_configureConversionMemory(ADC_MEM0, ADC_VREFPOS_AVCC_VREFNEG_VSS, ADC_INPUT_A0, false);
-
-    /* Configuring Sample Timer */
-    MAP_ADC14_enableSampleTimer(ADC_MANUAL_ITERATION);
-
-    /* Enabling/Toggling Conversion */
-    MAP_ADC14_enableConversion();
-    MAP_ADC14_toggleConversionTrigger();
-
-    /* Enabling interrupts */
-    MAP_ADC14_enableInterrupt(ADC_INT0);
-    MAP_Interrupt_enableInterrupt(INT_ADC14);
+    ADC14_enableModule();
+    ADC14_initModule(ADC_CLOCKSOURCE_MCLK, ADC_PREDIVIDER_1, ADC_DIVIDER_1, 0);
 }
 
-void ADC_InitMultiple(void)
+void ADC_InitSingle(uint32_t Pin, uint32_t ADC_Mem)
 {
-    /* Initializing ADC (MCLK/1/1) */
-    MAP_ADC14_enableModule();
-    MAP_ADC14_initModule(ADC_CLOCKSOURCE_MCLK, ADC_PREDIVIDER_1, ADC_DIVIDER_1, 0);
+    /* Configuring GPIOs (5.5 A0) */
+    GPIO_setAsPeripheralModuleFunctionInputPin(GPIO_PORT_P5, Pin, GPIO_TERTIARY_MODULE_FUNCTION);
 
+    /* Configuring ADC Memory */
+    ADC14_configureSingleSampleMode(ADC_Mem, false);
+
+    /*Configure ADC Input to corresponding memory and pin*/
+    switch(Pin)
+    {
+    case GPIO_PIN5:
+        ADC14_configureConversionMemory(ADC_Mem, ADC_VREFPOS_AVCC_VREFNEG_VSS, ADC_INPUT_A0, false);
+        break;
+    case GPIO_PIN4:
+        ADC14_configureConversionMemory(ADC_Mem, ADC_VREFPOS_AVCC_VREFNEG_VSS, ADC_INPUT_A1, false);
+        break;
+    case GPIO_PIN3:
+        ADC14_configureConversionMemory(ADC_Mem, ADC_VREFPOS_AVCC_VREFNEG_VSS, ADC_INPUT_A2, false);
+        break;
+    case GPIO_PIN2:
+        ADC14_configureConversionMemory(ADC_Mem, ADC_VREFPOS_AVCC_VREFNEG_VSS, ADC_INPUT_A3, false);
+        break;
+    }
+
+    /* Configuring Sample Timer */
+    ADC14_enableSampleTimer(ADC_MANUAL_ITERATION);
+
+    /* Enabling/Toggling Conversion */
+    ADC14_enableConversion();
+}
+
+uint16_t ADC_Read(uint32_t ADC_Mem)
+{
+    uint16_t ADC_Sample;
+
+    ADC14_toggleConversionTrigger();
+    while(ADC14_isBusy());
+    ADC_Sample = ADC14_getResult(ADC_Mem);
+
+    return ADC_Sample;
+}
+
+void ADC_InitMultiple(uint32_t Pins, uint32_t Start, uint32_t End, uint32_t PinCount)
+{
     /* Configuring GPIOs for Analog In */
-    MAP_GPIO_setAsPeripheralModuleFunctionInputPin(GPIO_PORT_P5, GPIO_PIN5 | GPIO_PIN4 | GPIO_PIN3 | GPIO_PIN2 | GPIO_PIN1| GPIO_PIN0, GPIO_TERTIARY_MODULE_FUNCTION);
+    GPIO_setAsPeripheralModuleFunctionInputPin(GPIO_PORT_P5, Pins, GPIO_TERTIARY_MODULE_FUNCTION);
 
-    /* Configuring ADC Memory (ADC_MEM0 - ADC_MEM7 (A0 - A4)*/
-    MAP_ADC14_configureMultiSequenceMode(ADC_MEM0, ADC_MEM4, false);
-    MAP_ADC14_configureConversionMemory(ADC_MEM0, ADC_VREFPOS_AVCC_VREFNEG_VSS, ADC_INPUT_A0, false);
-    MAP_ADC14_configureConversionMemory(ADC_MEM1, ADC_VREFPOS_AVCC_VREFNEG_VSS, ADC_INPUT_A1, false);
-    MAP_ADC14_configureConversionMemory(ADC_MEM2, ADC_VREFPOS_AVCC_VREFNEG_VSS, ADC_INPUT_A2, false);
-    MAP_ADC14_configureConversionMemory(ADC_MEM3, ADC_VREFPOS_AVCC_VREFNEG_VSS, ADC_INPUT_A3, false);
-    MAP_ADC14_configureConversionMemory(ADC_MEM4, ADC_VREFPOS_AVCC_VREFNEG_VSS, ADC_INPUT_A4, false);
-
-    /* Enabling the interrupt when a conversion on channel 4 (end of sequence)
-     *  is complete and enabling conversions */
-    MAP_ADC14_enableInterrupt(ADC_INT4);
-    MAP_Interrupt_enableInterrupt(INT_ADC14);
+    /*Configure ADC Memory*/
+    ADC14_configureMultiSequenceMode(Start, End, false);
+    uint32_t i;
+    for(i = 0; i < PinCount; i++)
+    {
+        ADC14_configureConversionMemory(i << 1, ADC_VREFPOS_INTBUF_VREFNEG_VSS, i, false);
+    }
 
     /* Setting up the sample timer to automatically step through the sequence convert.*/
-    MAP_ADC14_enableSampleTimer(ADC_AUTOMATIC_ITERATION);
+    ADC14_enableSampleTimer(ADC_AUTOMATIC_ITERATION);
 
-    /* Triggering the start of the sample*/
-    MAP_ADC14_enableConversion();
-    MAP_ADC14_toggleConversionTrigger();
+    /*Enable ADC Conversion*/
+    ADC14_enableConversion();
+}
+
+void ADC_ReadMultiple(uint16_t *ADC_Buffer)
+{
+    ADC14_toggleConversionTrigger();
+
+    while(ADC14_isBusy());
+    ADC14_getMultiSequenceResult(ADC_Buffer);
 }
 
 void ADC_WaitSample(void)
@@ -79,7 +101,6 @@ void ADC14_IRQHandler(void)
     if (status & ADC_INT4)
     {
         MAP_ADC14_getMultiSequenceResult(ADC_Buffer);
-        MAP_ADC14_toggleConversionTrigger();
         Sample_Ready = 1;
     }
 }

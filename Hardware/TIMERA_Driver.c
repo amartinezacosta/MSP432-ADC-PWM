@@ -3,7 +3,7 @@
 void (*TIMER_A0_CB)(void) = 0x0000000;
 void (*TIMER_A1_CB)(void) = 0x0000000;
 
-void TIMERA_Init(uint32_t TIMER, uint32_t Mode, void *Config)
+void TIMERA_Init(uint32_t TIMER, uint32_t Mode, void *Config, uint32_t Pins)
 {
     switch(Mode)
     {
@@ -22,7 +22,7 @@ void TIMERA_Init(uint32_t TIMER, uint32_t Mode, void *Config)
         MAP_Timer_A_initCompare(TIMER_A0_BASE, (Timer_A_CompareModeConfig*)Config);
         break;
     case PWM_MODE:
-        MAP_GPIO_setAsPeripheralModuleFunctionOutputPin(GPIO_PORT_P2, GPIO_PIN4,
+        MAP_GPIO_setAsPeripheralModuleFunctionOutputPin(GPIO_PORT_P2, Pins,
                                                 GPIO_PRIMARY_MODULE_FUNCTION);
         MAP_Timer_A_generatePWM(TIMER, (Timer_A_PWMConfig*)Config);
         break;

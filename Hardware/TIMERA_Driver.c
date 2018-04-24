@@ -17,9 +17,12 @@ void TIMERA_Init(uint32_t TIMER, uint32_t Mode, void *Config, uint32_t Pins)
         MAP_Timer_A_configureUpDownMode(TIMER, (Timer_A_UpDownModeConfig*)Config);
         break;
     case CAPTURE_MODE:
+        MAP_GPIO_setAsPeripheralModuleFunctionInputPin(GPIO_PORT_P2, Pins,
+                    GPIO_PRIMARY_MODULE_FUNCTION);
+        MAP_Timer_A_initCapture(TIMER, (Timer_A_CaptureModeConfig*)&Config);
         break;
     case COMPARE_MODE:
-        MAP_Timer_A_initCompare(TIMER_A0_BASE, (Timer_A_CompareModeConfig*)Config);
+        MAP_Timer_A_initCompare(TIMER, (Timer_A_CompareModeConfig*)Config);
         break;
     case PWM_MODE:
         MAP_GPIO_setAsPeripheralModuleFunctionOutputPin(GPIO_PORT_P2, Pins,

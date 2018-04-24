@@ -11,13 +11,9 @@ void ADC_Enable(uint32_t ClockSource, uint32_t Predivider, uint32_t Divider)
 
 void ADC_InitSingle(uint32_t Pin, uint32_t ADC_Mem)
 {
-    /* Configuring GPIOs (5.5 A0) */
     GPIO_setAsPeripheralModuleFunctionInputPin(GPIO_PORT_P5, Pin, GPIO_TERTIARY_MODULE_FUNCTION);
-
-    /* Configuring ADC Memory */
     ADC14_configureSingleSampleMode(ADC_Mem, false);
 
-    /*Configure ADC Input to corresponding memory and pin*/
     switch(Pin)
     {
     case GPIO_PIN5:
@@ -34,10 +30,7 @@ void ADC_InitSingle(uint32_t Pin, uint32_t ADC_Mem)
         break;
     }
 
-    /* Configuring Sample Timer */
     ADC14_enableSampleTimer(ADC_MANUAL_ITERATION);
-
-    /* Enabling/Toggling Conversion */
     ADC14_enableConversion();
 }
 

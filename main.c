@@ -69,6 +69,7 @@ void main(void)
        TIMERA_DutyCycle(TIMER_A0_BASE, &PWMConfig1, (uint32_t)Duty_Cycle[1]);
        TIMERA_DutyCycle(TIMER_A0_BASE, &PWMConfig2, (uint32_t)Duty_Cycle[2]);
 
+       /*TODO: Add event driven system here*/
        __delay_cycles(100000);
     }
 }

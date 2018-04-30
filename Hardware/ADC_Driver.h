@@ -3,12 +3,16 @@
 
 #include <ti/devices/msp432p4xx/driverlib/driverlib.h>
 
+#define ADC_PERIPH          0
+#define ADC_SAMPLE_READY    1
+
 #define ADC_BUFFER_SIZE     5
+
 
 void ADC_Enable(uint32_t ClockSource, uint32_t Predivider, uint32_t Divider);
 void ADC_InitSingle(uint32_t Pin, uint32_t ADC_Mem);
 void ADC_InitMultiple(uint32_t Pins, uint32_t Start, uint32_t End, uint32_t PinCount);
-void ADC_WaitSample(void);
+void ADC_RegisterCallback(void(*ADC_Callback)(uint32_t Peripheral, uint32_t Event, void *Param));
 uint16_t *ADC_GetBuffer(void);
 uint16_t ADC_Read(uint32_t ADC_Mem);
 void ADC_ReadMultiple(uint16_t *ADC_Buffer);

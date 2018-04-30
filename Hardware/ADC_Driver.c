@@ -1,6 +1,6 @@
 #include "ADC_Driver.h"
 
-volatile uint8_t Sample_Ready = 0;
+void (*ADC_Callback)(uint32_t Peripheral, uint32_t Event, void *Param) = 0x00000000;
 uint16_t ADC_Buffer[ADC_BUFFER_SIZE];
 
 void ADC_Enable(uint32_t ClockSource, uint32_t Predivider, uint32_t Divider)
@@ -73,15 +73,14 @@ void ADC_ReadMultiple(uint16_t *ADC_Buffer)
     ADC14_getMultiSequenceResult(ADC_Buffer);
 }
 
-void ADC_WaitSample(void)
-{
-    while(!Sample_Ready);
-    Sample_Ready = 0;
-}
-
 uint16_t *ADC_GetBuffer(void)
 {
     return ADC_Buffer;
+}
+
+void ADC_RegisterCallback(void(*Callback)(uint32_t Peripheral, uint32_t Event, void *Param))
+{
+    ADC_Callback = Callback;
 }
 
 void ADC14_IRQHandler(void)
@@ -94,7 +93,10 @@ void ADC14_IRQHandler(void)
     if (status & ADC_INT4)
     {
         MAP_ADC14_getMultiSequenceResult(ADC_Buffer);
-        Sample_Ready = 1;
+        if(ADC_Callback)
+        {
+            ADC_Callback(ADC_PERIPH, ADC_SAMPLE_READY, ADC_Buffer);
+        }
     }
 }
 

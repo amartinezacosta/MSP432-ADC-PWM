@@ -4,9 +4,8 @@ void QueueInit(Queue_t *Q, uint32_t size, void *Buffer)
 {
     Q->Buffer = Buffer;
     Q->head = 0;
-    Q->tail = -1;
+    Q->tail = 0;
     Q->size = size;
-    Q->count = 0;
 }
 
 bool Enqueue(Queue_t *Q, void *item, uint32_t size)
@@ -16,15 +15,8 @@ bool Enqueue(Queue_t *Q, void *item, uint32_t size)
         return false;
     }
 
-    if(Q->tail == Q->size - 1)
-    {
-        Q->tail = -1;
-    }
-
-    Q->tail += size;
-    Q->Buffer = (uint8_t*)Q->Buffer + Q->tail;
-    memcpy(Q->Buffer, item, size);
-    Q->count += size;
+    memcpy((uint8_t*)Q->Buffer + Q->head, item, size);
+    Q->head = (Q->head + size) % Q->size;
 
     return true;
 }
@@ -36,28 +28,20 @@ bool Dequeue(Queue_t *Q, void *item, uint32_t size)
         return false;
     }
 
-    memcpy(item, Q->Buffer, size);
-    Q->head += size;
-    Q->Buffer = (uint8_t*)Q->Buffer + Q->head;
-
-    if(Q->head == Q->size)
-    {
-        Q->head = 0;
-    }
-
-    Q->count -= size;
+    memcpy(item, (uint8_t*)Q->Buffer + Q->tail, size);
+    Q->tail = (Q->tail + size) % Q->size;
 
     return true;
 }
 
 bool QueueEmpty(Queue_t *Q)
 {
-    return Q->count == 0 ? true : false;
+    return Q->head == Q->tail ? true : false;
 }
 
 bool QueueFull(Queue_t *Q)
 {
-    return Q->count == Q->size ? true : false;
+    return (Q->head + 1) == Q->tail ? true : false;
 }
 
 uint32_t QueueCount(Queue_t *Q)

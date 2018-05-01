@@ -28,7 +28,7 @@ Timer_A_PWMConfig PWMConfig2 =
 {
      TIMER_A_CLOCKSOURCE_SMCLK,
      TIMER_A_CLOCKSOURCE_DIVIDER_1,
-     1280,                                   /*Period of the PWM signal, CAUTION! this is based on 64 KHz signal frequency*/
+     128,                                   /*Period of the PWM signal, CAUTION! this is based on 64 KHz signal frequency*/
      TIMER_A_CAPTURECOMPARE_REGISTER_3,
      TIMER_A_OUTPUTMODE_RESET_SET,
      64                                      /*Duty Cycle of the PWM signal, you can find the duty cycle percentage by dividing this number by the period*/
@@ -36,16 +36,17 @@ Timer_A_PWMConfig PWMConfig2 =
 
 Timer_A_UpModeConfig UpModeConfig =
 {
-        TIMER_A_CLOCKSOURCE_SMCLK,              // SMCLK Clock Source
-        TIMER_A_CLOCKSOURCE_DIVIDER_1,
-        1280,
-        TIMER_A_TAIE_INTERRUPT_DISABLE,         // Disable Timer interrupt
-        TIMER_A_CCIE_CCR0_INTERRUPT_ENABLE ,    // Enable CCR0 interrupt
-        TIMER_A_DO_CLEAR                        // Clear value
+     TIMER_A_CLOCKSOURCE_SMCLK,              // SMCLK Clock Source
+     TIMER_A_CLOCKSOURCE_DIVIDER_1,
+     1280,
+     TIMER_A_TAIE_INTERRUPT_DISABLE,         // Disable Timer interrupt
+     TIMER_A_CCIE_CCR0_INTERRUPT_ENABLE ,    // Enable CCR0 interrupt
+     TIMER_A_DO_CLEAR                        // Clear value
 };
 
 
 uint16_t ADC_Buffer[5];
+float Duty_Cycle[3];
 
 void EventCallback(uint32_t Event)
 {
@@ -55,9 +56,12 @@ void EventCallback(uint32_t Event)
         break;
     case TIMER_A1_EVENT:
         ADC_ReadMultiple(ADC_Buffer);
-        MAP_GPIO_toggleOutputOnPin(GPIO_PORT_P1, GPIO_PIN0);
+        Duty_Cycle[0] = 0.017*ADC_Buffer[0] + 27.0;
+        TIMERA_DutyCycle(TIMER_A0_BASE, &PWMConfig0, (uint32_t)Duty_Cycle[0]);
+        MAP_GPIO_toggleOutputOnPin(GPIO_PORT_P2, GPIO_PIN0);
         break;
     case IDLE_MESSAGE:
+        MAP_GPIO_toggleOutputOnPin(GPIO_PORT_P2, GPIO_PIN1);
         break;
     }
 }
@@ -67,8 +71,10 @@ void main(void)
     MAP_WDT_A_holdTimer();
     CS_PWM_Init();
 
-    MAP_GPIO_setAsOutputPin(GPIO_PORT_P1, GPIO_PIN0);
-    MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P1, GPIO_PIN0);
+    MAP_GPIO_setAsOutputPin(GPIO_PORT_P2, GPIO_PIN0);
+    MAP_GPIO_setAsOutputPin(GPIO_PORT_P2, GPIO_PIN1);
+    MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P2, GPIO_PIN0);
+    MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P2, GPIO_PIN1);
 
     /*Enable ADC Module*/
     ADC_Enable(ADC_CLOCKSOURCE_MCLK, ADC_PREDIVIDER_1, ADC_DIVIDER_1);
@@ -93,6 +99,7 @@ void main(void)
     TIMERA_DutyCycle(TIMER_A0_BASE, &PWMConfig1, 96);
     TIMERA_DutyCycle(TIMER_A0_BASE, &PWMConfig2, 64);
 
+    /*Main message dispatcher callback register*/
     RegisterMessageCallback(EventCallback);
 
     Interrupt_enableMaster();
@@ -100,7 +107,6 @@ void main(void)
 
     while(1)
     {
-        //Duty_Cycle[i] = 0.017*ADC_Buffer[i] + 27.0;
        Msg = GetMessage();
        DispatchMessage(Msg);
     }

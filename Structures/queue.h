@@ -10,7 +10,6 @@ typedef struct
     int32_t head;
     int32_t tail;
     uint32_t size;
-    uint32_t count;
 }Queue_t;
 
 void QueueInit(Queue_t *Q, uint32_t size, void *Buffer);

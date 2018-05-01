@@ -14,9 +14,12 @@
 #define COMPARE_MODE    4
 #define PWM_MODE        5
 
+#define TIMER_A0_EVENT  10
+#define TIMER_A1_EVENT  11
+
 void TIMERA_Init(uint32_t TIMER, uint32_t Mode, void *Config, uint32_t Pins);
 void TIMERA_DutyCycle(uint32_t TIMER, Timer_A_PWMConfig *pwm, uint32_t DutyCycle);
-void TIMERA_RegisterCallback(uint32_t TIMER, void(*TimerCallback)(void));
+void TIMERA_RegisterCallback(uint32_t TIMER, void(*TimerCallback)(uint32_t Event));
 void TIMERA_StartTimer(uint32_t TIMER, uint32_t Mode);
 
 #endif /* HARDWARE_TIMERA_DRIVER_H_ */

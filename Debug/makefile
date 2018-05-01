@@ -16,6 +16,8 @@ ORDERED_OBJS += \
 "./Hardware/ADC_Driver.obj" \
 "./Hardware/CS_Driver.obj" \
 "./Hardware/TIMERA_Driver.obj" \
+"./Structures/message.obj" \
+"./Structures/queue.obj" \
 "../msp432p401m.cmd" \
 $(GEN_CMDS__FLAG) \
 -llibc.a \
@@ -30,8 +32,10 @@ RMDIR := RMDIR /S/Q
 -include sources.mk
 -include subdir_vars.mk
 -include Hardware/subdir_vars.mk
+-include Structures/subdir_vars.mk
 -include subdir_rules.mk
 -include Hardware/subdir_rules.mk
+-include Structures/subdir_rules.mk
 -include objects.mk
 
 ifneq ($(MAKECMDGOALS),clean)
@@ -161,8 +165,8 @@ Servo_ADC_MPS432.hex: $(EXE_OUTPUTS)
 # Other Targets
 clean:
 	-$(RM) $(BIN_OUTPUTS__QUOTED)$(EXE_OUTPUTS__QUOTED)
-	-$(RM) "main.obj" "startup_msp432p401m_ccs.obj" "system_msp432p401m.obj" "Hardware\ADC_Driver.obj" "Hardware\CS_Driver.obj" "Hardware\TIMERA_Driver.obj" 
-	-$(RM) "main.d" "startup_msp432p401m_ccs.d" "system_msp432p401m.d" "Hardware\ADC_Driver.d" "Hardware\CS_Driver.d" "Hardware\TIMERA_Driver.d" 
+	-$(RM) "main.obj" "startup_msp432p401m_ccs.obj" "system_msp432p401m.obj" "Hardware\ADC_Driver.obj" "Hardware\CS_Driver.obj" "Hardware\TIMERA_Driver.obj" "Structures\message.obj" "Structures\queue.obj" 
+	-$(RM) "main.d" "startup_msp432p401m_ccs.d" "system_msp432p401m.d" "Hardware\ADC_Driver.d" "Hardware\CS_Driver.d" "Hardware\TIMERA_Driver.d" "Structures\message.d" "Structures\queue.d" 
 	-@echo 'Finished clean'
 	-@echo ' '
 

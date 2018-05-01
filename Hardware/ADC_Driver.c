@@ -1,6 +1,6 @@
 #include "ADC_Driver.h"
 
-void (*ADC_Callback)(uint32_t Peripheral, uint32_t Event, void *Param) = 0x00000000;
+void (*ADC_Callback)(uint32_t Event) = 0x00000000;
 uint16_t ADC_Buffer[ADC_BUFFER_SIZE];
 
 void ADC_Enable(uint32_t ClockSource, uint32_t Predivider, uint32_t Divider)
@@ -78,7 +78,7 @@ uint16_t *ADC_GetBuffer(void)
     return ADC_Buffer;
 }
 
-void ADC_RegisterCallback(void(*Callback)(uint32_t Peripheral, uint32_t Event, void *Param))
+void ADC_RegisterCallback(void(*Callback)(uint32_t Event))
 {
     ADC_Callback = Callback;
 }
@@ -95,7 +95,7 @@ void ADC14_IRQHandler(void)
         MAP_ADC14_getMultiSequenceResult(ADC_Buffer);
         if(ADC_Callback)
         {
-            ADC_Callback(ADC_PERIPH, ADC_SAMPLE_READY, ADC_Buffer);
+            ADC_Callback(ADC_SAMPLE_READY);
         }
     }
 }

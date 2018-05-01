@@ -1,7 +1,7 @@
 #include "TIMERA_Driver.h"
 
-void (*TIMER_A0_CB)(void) = 0x0000000;
-void (*TIMER_A1_CB)(void) = 0x0000000;
+void (*TIMER_A0_CB)(uint32_t Event) = 0x0000000;
+void (*TIMER_A1_CB)(uint32_t Event) = 0x0000000;
 
 void TIMERA_Init(uint32_t TIMER, uint32_t Mode, void *Config, uint32_t Pins)
 {
@@ -44,7 +44,7 @@ void TIMERA_Init(uint32_t TIMER, uint32_t Mode, void *Config, uint32_t Pins)
     }
 }
 
-void TIMERA_RegisterCallback(uint32_t TIMER, void(*TimerCallback)(void))
+void TIMERA_RegisterCallback(uint32_t TIMER, void(*TimerCallback)(uint32_t Event))
 {
     if(TimerCallback)
     {
@@ -87,7 +87,7 @@ void TA0_0_IRQHandler(void)
                    TIMER_A_CAPTURECOMPARE_REGISTER_0);
     if(TIMER_A0_CB)
     {
-        TIMER_A0_CB();
+        TIMER_A0_CB(TIMER_A0_EVENT);
     }
 }
 
@@ -97,7 +97,7 @@ void TA1_0_IRQHandler(void)
                TIMER_A_CAPTURECOMPARE_REGISTER_0);
     if(TIMER_A1_CB)
     {
-        TIMER_A1_CB();
+        TIMER_A1_CB(TIMER_A1_EVENT);
     }
 }
 

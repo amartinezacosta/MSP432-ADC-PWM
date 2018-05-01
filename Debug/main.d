@@ -50,6 +50,8 @@ main.obj: C:/ti/simplelink_msp432p4_sdk_2_10_00_14/source/ti/devices/msp432p4xx/
 main.obj: C:/ti/simplelink_msp432p4_sdk_2_10_00_14/source/ti/devices/msp432p4xx/driverlib/flash.h
 main.obj: ../Hardware/CS_Driver.h
 main.obj: ../Hardware/TIMERA_Driver.h
+main.obj: ../Structures/queue.h
+main.obj: ../Structures/message.h
 
 ../main.c: 
 ../Hardware/ADC_Driver.h: 
@@ -101,3 +103,5 @@ C:/ti/simplelink_msp432p4_sdk_2_10_00_14/source/ti/devices/msp432p4xx/driverlib/
 C:/ti/simplelink_msp432p4_sdk_2_10_00_14/source/ti/devices/msp432p4xx/driverlib/flash.h: 
 ../Hardware/CS_Driver.h: 
 ../Hardware/TIMERA_Driver.h: 
+../Structures/queue.h: 
+../Structures/message.h: 
